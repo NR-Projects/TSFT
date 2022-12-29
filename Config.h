@@ -1,40 +1,41 @@
 #pragma once
 
+#include <chrono>
 #include <iostream>
 #include <filesystem>
 #include <fstream>
 #include <map>
 #include <string>
-#include <vector>
+
 
 class Config
 {
 public:
-	static void PrintHelp();
+	static void help();
 
-	Config();
-	void LoadConfig();
-	void ShowConfig();
-	void EditConfig();
-
-private:
-	void _GenerateDefaultPath();
-	void _GenerateConfig();
-	void _GenerateCategories();
-	bool _IsConfigExists();
-	void _ParseConfigLine(std::string line);
-	void _ParseCategory(std::string CategoryType, std::vector<std::string> categories);
+	void load_config();
+	void print_config();
+	void edit_config();
 
 private:
-	const char* DefaultAppPath = "C:\\TunaSalmon\\tsft";
-	const char* ConfigPath = "C:\\TunaSalmon\\tsft\\tsftconfig.txt";
-	const char* BaseCategoryDefaultPath = "basecategorypath.txt";
-	// Props
-	std::string BaseCategoriesPath = "";
-	std::string ExtendedCategoriesPath = "";
+	void _generate_config();
+	bool _is_config_exist();
+
+	void _parse_config_line(std::string _line);
+	void _parse_categories(std::vector<std::string> _categories);
+
+	bool _str2bool(std::string _strbool);
+
+private:
+	std::string default_path = "C:\\TunaSalmon\\tsft\\";
+	std::string config_path = default_path + "tsftconfig.txt";
+	std::string categories_path = "C:\\TunaSalmon\\tsft\\categories.txt"; // Can be override by config file
 
 public:
-	std::map<std::string, std::vector<std::string>> BaseCategories;
-	std::map<std::string, std::vector<std::string>> ExtendedCategories;
+	int print_mode = 1; // 0 -> Structure, 1 -> Detail
+	bool enable_logs = false;
+	bool show_time_to_execute = false;
+
+	std::map<std::string, std::vector<std::string>> categories;
 };
 

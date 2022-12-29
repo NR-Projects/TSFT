@@ -1,73 +1,53 @@
 #include "Config.h"
 
-void Config::PrintHelp() {
+void Config::help() {
 	std::cout
-		<< "    Show Config:                        tsft config /s                          \n"
-		<< "    Edit Config:                        tsft config /e                          \n"
+		<< "    Show Config:                        tsft config -s								\n"
+		<< "    Edit Config:                        tsft config -e								\n"
 		<< std::endl;
 }
 
-Config::Config()
+void Config::load_config()
 {
-}
-
-void Config::LoadConfig()
-{
-	_GenerateDefaultPath();
-
-	if (!_IsConfigExists()) {
-		_GenerateConfig();
-		_GenerateCategories();
-	}
-
+	if (!this->_is_config_exist()) this->_generate_config();
 
 	// Load Config
 	std::ifstream r_file;
 	std::string f_line;
 
-	r_file.open(ConfigPath);
+	// Open Config
+	r_file.open(this->config_path);
 	while (std::getline(r_file, f_line))
 	{
-		_ParseConfigLine(f_line);
+		this->_parse_config_line(f_line);
 	}
 	r_file.close();
-	
-	// Load Base Category
-	r_file.open(BaseCategoriesPath);
+
+	// Open Category
+	r_file.open(this->categories_path);
 	std::vector<std::string> tbvec;
 	while (std::getline(r_file, f_line))
 	{
 		tbvec.push_back(f_line);
 	}
-	_ParseCategory("Base", tbvec);
-	r_file.close();
-
-
-	// Load Extended Category (If Exists)
-	if (ExtendedCategoriesPath == "") return;
-
-	r_file.open(ExtendedCategoriesPath);
-	std::vector<std::string> tevec;
-	while (std::getline(r_file, f_line))
-	{
-		tevec.push_back(f_line);
-	}
-	_ParseCategory("Extended", tevec);
+	this->_parse_categories(tbvec);
 	r_file.close();
 }
 
-void Config::ShowConfig()
+void Config::print_config()
 {
 	// Show Config
 	std::cout
 		<< "[Config] \n"
-		<< "BaseCategoryPath=" << BaseCategoriesPath << "\n"
-		<< "ExtendedCategoryPath=" << ExtendedCategoriesPath << "\n"
-		<< "\n\n";
-	
-	std::cout<< "[Base Categories] \n";
+		<< "category_path=" << this->categories_path << "\n"
+		<< "print_mode=" << this->print_mode << "\n"
+		<< "enable_logs=" << std::boolalpha << this->enable_logs << "\n"
+		<< "show_time_to_execute=" << std::boolalpha << this->show_time_to_execute << "\n"
+ 		<< "\n";
 
-	for (auto const& x : BaseCategories)
+	std::cout << "[Categories] \n";
+
+	for (auto const& x : this->categories)
 	{
 		std::cout << "->" << x.first << "\n";
 		for (std::string cat : x.second) {
@@ -78,109 +58,98 @@ void Config::ShowConfig()
 	}
 
 	std::cout << "\n\n";
+}
 
-	std::cout << "[Extended Categories] \n";
+void Config::edit_config()
+{
+	std::cout << "Opening notepad to edit config and categories... \n";
+	system(std::string("notepad " + this->config_path).c_str());
+	system(std::string("notepad " + this->categories_path).c_str());
+}
 
-	for (auto const& x : ExtendedCategories)
-	{
-		std::cout << "->" << x.first << "\n";
-		for (std::string cat : x.second) {
-			std::cout << cat << "\n";
-		}
+void Config::_generate_config()
+{
+	if (!std::filesystem::exists(this->default_path)) {
+		std::filesystem::create_directories(this->default_path);
+	}
 
-		std::cout << "\n";
+	if (!std::filesystem::exists(this->config_path)) {
+		std::ofstream config_file;
+		config_file.open(this->config_path);
+		config_file << "* This is a comment \n";
+		config_file << "* Use NONE to indicate that no path has been placed \n";
+		config_file << "* For missing properties, it will be set as default in the initial generation of this file \n";
+		config_file << "category_path=C:\\TunaSalmon\\tsft\\categories.txt" << "\n";
+		config_file << "* For print mode, 0 -> Structure, 1 -> Detail \n";
+		config_file << "print_mode=1" << "\n";
+		config_file << "enable_logs=false" << "\n";
+		config_file << "show_time_to_execute=false" << "\n";
+		config_file.close();
+	}
+
+	if (!std::filesystem::exists(this->categories_path)) {
+		std::ofstream categories_file;
+		categories_file.open("C:\\TunaSalmon\\tsft\\categories.txt");
+		categories_file << "* This is a comment \n";
+		categories_file << "* categories are represented by -><category name> \n";
+		categories_file << "* Only put extensions without dot(.) \n";
+		categories_file << "->img" << "\n";
+		categories_file << "png" << "\n";
+		categories_file << "jpg" << "\n";
+		categories_file << "\n\n";
+		categories_file << "->vid" << "\n";
+		categories_file << "mp4" << "\n";
+		categories_file.close();
 	}
 }
 
-void Config::EditConfig()
+bool Config::_is_config_exist()
 {
-	std::cout << "Not Yet Available" << std::endl;
-}
-
-void Config::_GenerateDefaultPath()
-{
-	if (!std::filesystem::exists(DefaultAppPath)) {
-		std::filesystem::create_directories(DefaultAppPath);
-	}
-}
-
-void Config::_GenerateConfig()
-{
-	std::ofstream w_file;
-	w_file.open(ConfigPath);
-
-	w_file << "* This is a comment \n";
-	w_file << "* Use NONE to indicate that no path has been placed \n";
-	w_file << "BaseCategoryPath=basecategorypath.txt" << "\n";
-	w_file << "ExtendedCategoryPath=NONE" << "\n";
-
-	w_file.close();
-}
-
-void Config::_GenerateCategories()
-{
-	std::ofstream w_file;
-	w_file.open(DefaultAppPath + std::string("\\") + BaseCategoryDefaultPath);
-
-	w_file << "* This is a comment \n";
-	w_file << "* categories are represented by -><category name> \n";
-	w_file << "* Only put extensions without dot(.) \n";
-	w_file << "->img" << "\n";
-	w_file << "png" << "\n";
-	w_file << "jpg" << "\n";
-	w_file << "\n\n";
-	w_file << "->vid" << "\n";
-	w_file << "mp4" << "\n";
-
-	w_file.close();
-}
-
-bool Config::_IsConfigExists()
-{
-	std::ifstream infile(ConfigPath);
+	std::ifstream infile(this->config_path);
 	return infile.good();
 }
 
-void Config::_ParseConfigLine(std::string line)
+void Config::_parse_config_line(std::string _line)
 {
 	// Ignore Comments
-	if (line.length() > 0)
-		if (line[0] == '*')
+	if (_line.length() > 0)
+		if (_line[0] == '*')
 			return;
 
-	size_t pos = line.find("=");
-	std::string first_part = line.substr(0, pos);
-	std::string second_part = line.substr(pos + 1, line.length());
+	size_t pos = _line.find("=");
+	std::string arg1 = _line.substr(0, pos);
+	std::string arg2 = _line.substr(pos + 1, _line.length());
 
-	if (second_part == "NONE") return;
+	if (arg2 == "NONE") return;
 
-	if (first_part == "BaseCategoryPath")
-		BaseCategoriesPath = DefaultAppPath + std::string("\\") + second_part;
-	else if (first_part == "ExtendedCategoryPath")
-		ExtendedCategoriesPath = DefaultAppPath + std::string("\\") + second_part;
+	// Parse and Load
+	else if (arg1 == "category_path") this->categories_path = arg2;
+	else if (arg1 == "print_mode") this->print_mode = std::stoi(arg2);
+	else if (arg1 == "enable_logs") this->enable_logs = this->_str2bool(arg2);
+	else if (arg1 == "show_time_to_execute") this->show_time_to_execute = this->_str2bool(arg2);
 }
 
-void Config::_ParseCategory(std::string CategoryType, std::vector<std::string> categories)
+void Config::_parse_categories(std::vector<std::string> _categories)
 {
 	std::map<std::string, std::vector<std::string>> tmap;
 
-	bool lookForCategoryHead = true;
+	bool look_for_category_head = true;
 
 	std::string tvec_lbl;
-	
-	for (unsigned int i = 0; i < categories.size(); i++) {
-		std::string line = categories[i];
+
+	for (unsigned int i = 0; i < _categories.size(); i++) {
+		std::string line = _categories[i];
 
 		// Ignore Comments
 		if (line.length() > 0)
 			if (line[0] == '*')
 				continue;
 
-		if (lookForCategoryHead) {
+		if (look_for_category_head) {
 			// Look For ->
 			if (line.length() > 2 && line.substr(0, 2) == "->") {
-				lookForCategoryHead = false;
-				tvec_lbl = line.substr(2, line.length()-2);
+				look_for_category_head = false;
+				tvec_lbl = line.substr(2, line.length() - 2);
 				tmap.insert(
 					std::make_pair(
 						tvec_lbl,
@@ -200,12 +169,16 @@ void Config::_ParseCategory(std::string CategoryType, std::vector<std::string> c
 			}
 			else {
 				// If Clear Str is Encountered
-				lookForCategoryHead = true;
+				look_for_category_head = true;
 			}
 		}
 	}
 
-	// Overwrite Data of Selected Type
-	if (CategoryType == "Base") BaseCategories = tmap;
-	else if (CategoryType == "Extended") ExtendedCategories = tmap;
+	this->categories = tmap;
+}
+
+bool Config::_str2bool(std::string _strbool)
+{
+	if (_strbool == "true") return true;
+	return false;
 }
