@@ -69,7 +69,7 @@ void FileHandler::show_fnf(std::vector<file_struct> _fnf)
 			for (file_struct file : _fnf) {
 				std::filesystem::directory_entry entry = file._entry;
 				
-				std::cout << std::string(file._depth, ' ') << "|-" << entry.path().filename().string() << "\n";
+				std::cout << std::string(file._depth * 2, ' ') << "|-" << entry.path().filename().string() << "\n";
 			}
 			break;
 		case 1:

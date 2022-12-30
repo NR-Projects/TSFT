@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
 #pragma endregion
 
 #pragma region Removing FnF
-        else if (argv[1] == "-r") {
+        else if (is_arg_eq(argv[1], "-r")) {
             // Removing FnF
             if (is_arg_eq(argv[2], "fl")) {
                 filehandler.remove_fnf(
@@ -148,7 +148,6 @@ int main(int argc, char *argv[])
 #pragma region Printing FnF
         else if (is_arg_eq(argv[1], "-p")) {
             // Printing FnF
-            std::cout << argc;
             if (argc == 2) {
                 filehandler.show_fnf(
                     filehandler.get_all_fnf()
