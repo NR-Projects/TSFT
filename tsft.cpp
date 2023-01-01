@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
                 );
                 has_executed_command = true;
             }
-            else if (is_arg_eq(argv[2], "fl")) {
+            else if (is_arg_eq(argv[2], "fd")) {
                 filehandler.remove_fnf(
                     get_arg_list(argv[3]),
                     FileHandler::FOLDER_TYPE
