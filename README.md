@@ -10,13 +10,8 @@ You may set up additional configuration on C:\\TunaSalmon\\tsft
 
 ## Usage
 
-Use ``` tsft ``` to learn about its different functions.
+Use ``` tsft ``` to start.
 
-
-Some of the sample commands are:  
-``` tsft +fl file.md ``` will add a new file called file.md in the current directory  
-``` tsft -fd folder ``` will add a new folder called folder in the current directory  
-``` tsft -p ``` will print all items in the current directory at depth 0  
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
