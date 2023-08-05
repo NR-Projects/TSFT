@@ -1,11 +1,6 @@
 #pragma once
 
-#include <chrono>
-#include <iostream>
-#include <filesystem>
-#include <fstream>
-#include <map>
-#include <string>
+#include "libs.h"
 
 
 class Config

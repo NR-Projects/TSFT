@@ -28,9 +28,9 @@ void FileHandler::help()
 		<< "    Clone Path:                         tsft -c [depth] (dest) [src]						\n"
 		<< "\n"
 		<< "        Clone with Substring																\n"
-		<< "        Substring Filters:              tsft -c [depth] -sf \"<name(s), ...>\" (dest) [src]	\n"
-		<< "        Category Filters:               tsft -c [depth] -cf \"<name(s), ...>\" (dest) [src]	\n"
-		<< "        Extension Filters:              tsft -c [depth] -ef \"<name(s), ...>\" (dest) [src]	\n"
+		<< "        Substring Filters:              tsft -c (depth) -sf \"<name(s), ...>\" (dest) [src]	\n"
+		<< "        Category Filters:               tsft -c (depth) -cf \"<name(s), ...>\" (dest) [src]	\n"
+		<< "        Extension Filters:              tsft -c (depth) -ef \"<name(s), ...>\" (dest) [src]	\n"
 
 		<< std::endl;
 }
@@ -45,6 +45,12 @@ void FileHandler::create_fnf(std::vector<std::string> _path_names, fnf_type _typ
 	switch (_type) {
 		case FILE_TYPE:
 			for (std::string file : _path_names) {
+
+				if (file == "") {
+					std::cout << "Empty File Path Detected" << std::endl;
+					continue;
+				}
+
 				std::ofstream c_file;
 				c_file.open(file);
 				c_file.close();
@@ -53,6 +59,12 @@ void FileHandler::create_fnf(std::vector<std::string> _path_names, fnf_type _typ
 			break;
 		case FOLDER_TYPE:
 			for (std::string folder : _path_names) {
+
+				if (folder == "") {
+					std::cout << "Empty Folder Path Detected" << std::endl;
+					continue;
+				}
+
 				std::filesystem::create_directory(folder);
 				std::cout << "Directory -> " << folder << " successfully created" << std::endl;
 			}
@@ -89,7 +101,7 @@ void FileHandler::show_fnf(std::vector<file_struct> _fnf)
 
 void FileHandler::clone_fnf(std::vector<file_struct> _fnf, std::string _dest_path)
 {
-	std::cout << "Starting Creating Clones For:" << '\n';
+	std::cout << "Starting Creating Clones:" << '\n';
 	for (file_struct file : _fnf) {
 		std::filesystem::path dir(_dest_path);
 		std::filesystem::path c_file(file._entry.path().filename().string());

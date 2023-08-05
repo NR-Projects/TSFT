@@ -1,10 +1,8 @@
 // tsft.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
-#include <cstdio>
-#include <ctime>
-#include <iostream>
-
+#include "libs.h"
+#include "Utility.h"
 #include "Config.h"
 #include "FileHandler.h"
 
@@ -18,38 +16,6 @@ void print_help() {
 
     Config::help();
     FileHandler::help();
-}
-
-std::string trim_spaces(std::string str) {
-    str.erase(0, str.find_first_not_of(' '));
-    str.erase(str.find_last_not_of(' ') + 1);
-    return str;
-}
-
-std::vector<std::string> get_arg_list(std::string arg_list) {
-    // Check If List Or Not
-    std::string args = arg_list;
-    std::vector<std::string> args_as_list;
-
-    size_t checkForList = args.find(',');
-
-    if (checkForList == std::string::npos) {
-        args_as_list.push_back(trim_spaces(args));
-    }
-    else {
-        size_t pos = 0;
-        while ((pos = args.find(',')) != std::string::npos) {
-            args_as_list.push_back(trim_spaces(args.substr(0, pos)));
-            args.erase(0, pos + 1);
-        }
-        args_as_list.push_back(trim_spaces(args));
-    }
-
-    return args_as_list;
-}
-
-bool is_arg_eq(const char* arg1, const char* arg2) {
-    return (strcmp(arg1, arg2) == 0);
 }
 
 
@@ -68,7 +34,7 @@ int main(int argc, char *argv[])
     // Initialize FileHandler
     FileHandler filehandler(config);
 
-#pragma region Standard Options
+#pragma region Default Options
     // Check for no arguments passed
     if (argc == 1) {
         std::cout << "Output may be affected depending on priveleges" << "\n";
@@ -79,45 +45,46 @@ int main(int argc, char *argv[])
 
     // Check for "--version" or "--help" requests
     else if (argc == 2) {
-        if (is_arg_eq(argv[1], "--version")) {
+        if (utility::is_arg_eq(argv[1], "--version")) {
             std::cout << "v1.0.0" << "\n";
             has_executed_command = true;
         }
-        else if (is_arg_eq(argv[1], "--help")) {
+        else if (utility::is_arg_eq(argv[1], "--help")) {
             print_help();
             has_executed_command = true;
         }
     }
 #pragma endregion
-
+    
     if (argc >= 2) {
-        // Config Actions
-        if (is_arg_eq(argv[1], "config")) {
-            if (is_arg_eq(argv[2], "-s")) {
+
+#pragma region Config Actions
+        if (utility::is_arg_eq(argv[1], "config")) {
+            if (utility::is_arg_eq(argv[2], "-s")) {
                 config.print_config();
                 has_executed_command = true;
             }
 
-            else if (is_arg_eq(argv[2], "-e")) {
+            else if (utility::is_arg_eq(argv[2], "-e")) {
                 config.edit_config();
                 has_executed_command = true;
             }
         }
+#pragma endregion
 
-        // File Actions
 #pragma region Adding FnF
-        else if (is_arg_eq(argv[1], "-a")) {
+        else if (utility::is_arg_eq(argv[1], "-a")) {
             // Adding FnF
-            if (is_arg_eq(argv[2], "fl")) {
+            if (utility::is_arg_eq(argv[2], "fl")) {
                 filehandler.create_fnf(
-                    get_arg_list(argv[3]),
+                    utility::get_arg_list(argv[3]),
                     FileHandler::FILE_TYPE
                 );
                 has_executed_command = true;
             }
-            else if (is_arg_eq(argv[2], "fd")) {
+            else if (utility::is_arg_eq(argv[2], "fd")) {
                 filehandler.create_fnf(
-                    get_arg_list(argv[3]),
+                    utility::get_arg_list(argv[3]),
                     FileHandler::FOLDER_TYPE
                 );
                 has_executed_command = true;
@@ -126,18 +93,18 @@ int main(int argc, char *argv[])
 #pragma endregion
 
 #pragma region Removing FnF
-        else if (is_arg_eq(argv[1], "-r")) {
+        else if (utility::is_arg_eq(argv[1], "-r")) {
             // Removing FnF
-            if (is_arg_eq(argv[2], "fl")) {
+            if (utility::is_arg_eq(argv[2], "fl")) {
                 filehandler.remove_fnf(
-                    get_arg_list(argv[3]),
+                    utility::get_arg_list(argv[3]),
                     FileHandler::FILE_TYPE
                 );
                 has_executed_command = true;
             }
-            else if (is_arg_eq(argv[2], "fd")) {
+            else if (utility::is_arg_eq(argv[2], "fd")) {
                 filehandler.remove_fnf(
-                    get_arg_list(argv[3]),
+                    utility::get_arg_list(argv[3]),
                     FileHandler::FOLDER_TYPE
                 );
                 has_executed_command = true;
@@ -146,7 +113,7 @@ int main(int argc, char *argv[])
 #pragma endregion
 
 #pragma region Printing FnF
-        else if (is_arg_eq(argv[1], "-p")) {
+        else if (utility::is_arg_eq(argv[1], "-p")) {
             // Printing FnF
             if (argc == 2) {
                 filehandler.show_fnf(
@@ -163,29 +130,29 @@ int main(int argc, char *argv[])
             }
 
             else if (argc == 4) {
-                if (is_arg_eq(argv[2], "-sf")) {
+                if (utility::is_arg_eq(argv[2], "-sf")) {
                     filehandler.show_fnf(
-                        filehandler.get_all_fnf_name_filtered(get_arg_list(argv[3]))
+                        filehandler.get_all_fnf_name_filtered(utility::get_arg_list(argv[3]))
                     );
                     has_executed_command = true;
                 }
-                else if (is_arg_eq(argv[2], "-cf")) {
+                else if (utility::is_arg_eq(argv[2], "-cf")) {
                     filehandler.show_fnf(
-                        filehandler.get_all_fnf_category_filtered(get_arg_list(argv[3]))
+                        filehandler.get_all_fnf_category_filtered(utility::get_arg_list(argv[3]))
                     );
                     has_executed_command = true;
                 }
-                else if (is_arg_eq(argv[2], "-ef")) {
+                else if (utility::is_arg_eq(argv[2], "-ef")) {
                     filehandler.show_fnf(
-                        filehandler.get_all_fnf_extension_filtered(get_arg_list(argv[3]))
+                        filehandler.get_all_fnf_extension_filtered(utility::get_arg_list(argv[3]))
                     );
                     has_executed_command = true;
                 }
             }
 
             else if (argc == 5) {
-                if (is_arg_eq(argv[3], "-sf")) {
-                    std::vector<std::string> substrfilters = get_arg_list(argv[4]);
+                if (utility::is_arg_eq(argv[3], "-sf")) {
+                    std::vector<std::string> substrfilters = utility::get_arg_list(argv[4]);
                     filehandler.show_fnf(
                         filehandler.get_all_fnf_name_filtered(
                             substrfilters,
@@ -195,8 +162,8 @@ int main(int argc, char *argv[])
                     );
                     has_executed_command = true;
                 }
-                else if (is_arg_eq(argv[3], "-cf")) {
-                    std::vector<std::string> substrfilters = get_arg_list(argv[4]);
+                else if (utility::is_arg_eq(argv[3], "-cf")) {
+                    std::vector<std::string> substrfilters = utility::get_arg_list(argv[4]);
                     filehandler.show_fnf(
                         filehandler.get_all_fnf_category_filtered(
                             substrfilters,
@@ -206,8 +173,8 @@ int main(int argc, char *argv[])
                     );
                     has_executed_command = true;
                 }
-                else if (is_arg_eq(argv[3], "-ef")) {
-                    std::vector<std::string> substrfilters = get_arg_list(argv[4]);
+                else if (utility::is_arg_eq(argv[3], "-ef")) {
+                    std::vector<std::string> substrfilters = utility::get_arg_list(argv[4]);
                     filehandler.show_fnf(
                         filehandler.get_all_fnf_extension_filtered(
                             substrfilters,
@@ -222,7 +189,7 @@ int main(int argc, char *argv[])
 #pragma endregion
 
 #pragma region Cloning FnF
-        else if (is_arg_eq(argv[1], "-c")) {
+        else if (utility::is_arg_eq(argv[1], "-c")) {
             if (argc == 3) {
                 filehandler.clone_fnf(
                     filehandler.get_all_fnf(
@@ -244,10 +211,20 @@ int main(int argc, char *argv[])
                 has_executed_command = true;
             }
             else if (argc == 5) {
-                if (is_arg_eq(argv[3], "-sf")) {
+                filehandler.clone_fnf(
+                    filehandler.get_all_fnf(
+                        argv[4],
+                        std::stoi(argv[2])
+                    ),
+                    argv[3]
+                );
+                has_executed_command = true;
+            }
+            else if (argc == 6) {
+                if (utility::is_arg_eq(argv[3], "-sf")) {
                     filehandler.clone_fnf(
                         filehandler.get_all_fnf_name_filtered(
-                            get_arg_list(argv[4]),
+                            utility::get_arg_list(argv[4]),
                             "",
                             std::stoi(argv[2])
                         ),
@@ -255,10 +232,10 @@ int main(int argc, char *argv[])
                     );
                     has_executed_command = true;
                 }
-                else if (is_arg_eq(argv[3], "-cf")) {
+                if (utility::is_arg_eq(argv[3], "-cf")) {
                     filehandler.clone_fnf(
                         filehandler.get_all_fnf_category_filtered(
-                            get_arg_list(argv[4]),
+                            utility::get_arg_list(argv[4]),
                             "",
                             std::stoi(argv[2])
                         ),
@@ -266,10 +243,10 @@ int main(int argc, char *argv[])
                     );
                     has_executed_command = true;
                 }
-                else if (is_arg_eq(argv[3], "-ef")) {
+                if (utility::is_arg_eq(argv[3], "-ef")) {
                     filehandler.clone_fnf(
                         filehandler.get_all_fnf_extension_filtered(
-                            get_arg_list(argv[4]),
+                            utility::get_arg_list(argv[4]),
                             "",
                             std::stoi(argv[2])
                         ),
@@ -278,11 +255,11 @@ int main(int argc, char *argv[])
                     has_executed_command = true;
                 }
             }
-            else if (argc == 6) {
-                if (is_arg_eq(argv[3], "-sf")) {
+            else if (argc == 7) {
+                if (utility::is_arg_eq(argv[3], "-sf")) {
                     filehandler.clone_fnf(
                         filehandler.get_all_fnf_name_filtered(
-                            get_arg_list(argv[4]),
+                            utility::get_arg_list(argv[4]),
                             argv[6],
                             std::stoi(argv[2])
                         ),
@@ -290,10 +267,10 @@ int main(int argc, char *argv[])
                     );
                     has_executed_command = true;
                 }
-                if (is_arg_eq(argv[3], "-cf")) {
+                if (utility::is_arg_eq(argv[3], "-cf")) {
                     filehandler.clone_fnf(
                         filehandler.get_all_fnf_category_filtered(
-                            get_arg_list(argv[4]),
+                            utility::get_arg_list(argv[4]),
                             argv[6],
                             std::stoi(argv[2])
                         ),
@@ -301,10 +278,10 @@ int main(int argc, char *argv[])
                     );
                     has_executed_command = true;
                 }
-                if (is_arg_eq(argv[3], "-ef")) {
+                if (utility::is_arg_eq(argv[3], "-ef")) {
                     filehandler.clone_fnf(
                         filehandler.get_all_fnf_extension_filtered(
-                            get_arg_list(argv[4]),
+                            utility::get_arg_list(argv[4]),
                             argv[6],
                             std::stoi(argv[2])
                         ),

@@ -1,14 +1,6 @@
 #pragma once
 
-#include <algorithm>
-#include <iostream>
-#include <chrono>
-#include <direct.h>
-#include <filesystem>
-#include <fstream>
-#include <string>
-#include <vector>
-#include <map>
+#include "libs.h"
 #include "Config.h"
 
 struct file_struct {
